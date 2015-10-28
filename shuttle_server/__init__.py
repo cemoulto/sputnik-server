@@ -10,13 +10,13 @@ from . import util
 
 
 class ShuttleServer(Flask):
-    def run(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.index = PackageIndex(host='s3.eu-central-1.amazonaws.com',
                                   bucket='spacy-index')
         self.action = IndexAction(region='eu-central-1',
                                   table='index-action')
 
-        super(ShuttleServer, self).run(*args, **kwargs)
+        super(ShuttleServer, self).__init__(*args, **kwargs)
 
 
 app = ShuttleServer(__name__)
