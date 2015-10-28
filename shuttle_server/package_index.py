@@ -17,10 +17,9 @@ class PackageIndex(threading.Thread):
             os.environ.get('AWS_SECRET_ACCESS_KEY'))
         self.host = kwargs.pop('host')
         self.bucket = kwargs.pop('bucket')
-        self.interval = kwargs.pop('interval', 600)
+        self.interval = kwargs.pop('interval', 600)  # 600sec = 10min
 
         self.packages = {}
-        self.loaded = False
 
         self.start()
 
@@ -55,6 +54,5 @@ class PackageIndex(threading.Thread):
 
             # atomic update
             self.packages = packages
-            self.loaded = True
 
             time.sleep(self.interval)
