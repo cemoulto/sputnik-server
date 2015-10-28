@@ -16,7 +16,7 @@ class PackageIndex(threading.Thread):
         self.secret_access_key = kwargs.pop('secret_access_key',
             os.environ.get('AWS_SECRET_ACCESS_KEY'))
         self.host = kwargs.pop('host')
-        self.bucket_name = kwargs.pop('bucket')
+        self.bucket = kwargs.pop('bucket')
         self.interval = kwargs.pop('interval', 600)
 
         self.packages = {}
@@ -38,14 +38,14 @@ class PackageIndex(threading.Thread):
                             self.secret_access_key,
                             host=self.host)
 
-        bucket = conn.get_bucket(self.bucket_name, validate=False)
+        bucket = conn.get_bucket(self.bucket, validate=False)
 
         for item in bucket.list():
             if item.name.endswith('/meta.json'):
 
                 dirname = os.path.basename(os.path.dirname(item.name))
                 if self.__class__.parse_package_name(dirname):
-                    yield (dirname, os.path.join(self.host, 'spacy-index', item.name))
+                    yield (dirname, '/index/%s' % item.name)
 
     def run(self):
         while True:

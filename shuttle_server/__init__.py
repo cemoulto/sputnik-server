@@ -1,6 +1,7 @@
 import os
+from functools import wraps
 
-from flask import Flask, session, jsonify, abort, make_response
+from flask import Flask, session, jsonify, abort, make_response, redirect, current_app
 
 from .package_index import PackageIndex
 from . import util
@@ -23,15 +24,31 @@ class ShuttleServer(Flask):
 app = ShuttleServer(__name__)
 
 
-@app.route('/index')
-def index():
-    if not 'install_id' in session:
-        session['install_id'] = util.random_string()
+def track_user(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not 'install_id' in session:
+            session['install_id'] = util.random_string()
         print(session['install_id'])
+        return f(*args, **kwargs)
+    return decorated_function
 
-    if not app.index.loaded:
-        abort(500)
 
-    resp = make_response(jsonify(app.index.packages))
-    resp.headers['Server'] = "Shuttle"
-    return resp
+@app.route('/index')
+@track_user
+def index():
+    return jsonify(current_app.index.packages)
+
+
+@app.route('/index/<package>/<filename>')
+@track_user
+def index_package(package, filename):
+    if filename not in ['meta.json', 'package.json', 'archive.gz']:
+        abort(404)
+
+    if not package in current_app.index.packages:
+        abort(404)
+
+    url = 'https://%s/%s/%s/%s' % (current_app.index.host,
+        current_app.index.bucket, package, filename)
+    return redirect(url)
