@@ -11,14 +11,10 @@ from . import util
 
 class ShuttleServer(Flask):
     def run(self, *args, **kwargs):
-        debug = self.debug or kwargs.get('debug')
-
-        # don't run again when reloading code (debug mode)
-        if not debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-            self.index = PackageIndex(host='s3.eu-central-1.amazonaws.com',
-                                      bucket='spacy-index')
-            self.action = IndexAction(region='eu-central-1',
-                                      table='index-action')
+        self.index = PackageIndex(host='s3.eu-central-1.amazonaws.com',
+                                  bucket='spacy-index')
+        self.action = IndexAction(region='eu-central-1',
+                                  table='index-action')
 
         super(ShuttleServer, self).run(*args, **kwargs)
 
