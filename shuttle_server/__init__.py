@@ -41,16 +41,6 @@ def track_user(f):
     return decorated_function
 
 
-@app.route('/config')
-def debug():
-    return jsonify({
-        'DEBUG': util.hide(os.environ.get('DEBUG')),
-        'SECRET_KEY': util.hide(os.environ.get('SECRET_KEY')),
-        'AWS_ACCESS_KEY_ID': util.hide(os.environ.get('AWS_ACCESS_KEY_ID')),
-        'AWS_SECRET_ACCESS_KEY': util.hide(os.environ.get('AWS_SECRET_ACCESS_KEY')),
-    })
-
-
 @app.route('/index')
 @track_user
 def index():
