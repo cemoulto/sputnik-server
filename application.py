@@ -1,4 +1,5 @@
 import os
+
 from shuttle_server import app as application
 
 
