@@ -91,5 +91,5 @@ def index_package(package, filename):
         abort(404)
 
     url = 'https://%s/%s/%s/%s' % (current_app.index.host,
-        current_app.index.bucket, package, filename)
+        current_app.index.bucket_name, package, filename)
     return redirect(url)

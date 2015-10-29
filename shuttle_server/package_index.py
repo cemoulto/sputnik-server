@@ -9,7 +9,7 @@ class PackageIndex():
         self.access_key_id = kwargs.pop('access_key_id')
         self.secret_access_key = kwargs.pop('secret_access_key')
         self.host = kwargs.pop('host')
-        self.bucket = kwargs.pop('bucket')
+        self.bucket_name = kwargs.pop('bucket')
         self.interval = kwargs.pop('interval', 600)  # 600sec = 10min
 
         self.packages = {}
@@ -18,7 +18,7 @@ class PackageIndex():
         conn = S3Connection(self.access_key_id,
                             self.secret_access_key,
                             host=self.host)
-        self.bucket = conn.get_bucket(self.bucket, validate=False)
+        self.bucket = conn.get_bucket(self.bucket_name, validate=False)
         self.reindex()
 
     @classmethod
