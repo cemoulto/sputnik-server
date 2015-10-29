@@ -90,6 +90,4 @@ def index_package(package, filename):
     if not package in current_app.index.packages:
         abort(404)
 
-    url = 'https://%s/%s/%s/%s' % (current_app.index.host,
-        current_app.index.bucket_name, package, filename)
-    return redirect(url)
+    return redirect(current_app.index.get_url(os.path.join(package, filename)))

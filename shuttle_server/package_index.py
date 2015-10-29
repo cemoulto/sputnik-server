@@ -17,10 +17,10 @@ class PackageIndex():
         self.packages = {}
 
         os.environ['S3_USE_SIGV4'] = 'True'
-        conn = S3Connection(self.access_key_id,
+        self.conn = S3Connection(self.access_key_id,
                             self.secret_access_key,
                             host=self.host)
-        self.bucket = conn.get_bucket(self.bucket_name, validate=False)
+        self.bucket = self.conn.get_bucket(self.bucket_name, validate=False)
         self.reindex()
 
     @classmethod
@@ -38,6 +38,15 @@ class PackageIndex():
                 dirname = os.path.basename(os.path.dirname(item.name))
                 if self.__class__.parse_package_name(dirname):
                     yield (dirname, '/index/%s' % item.name, etag)
+
+    def get_url(self, path):
+        return self.conn.generate_url(
+            expires_in=600,
+            method='GET',
+            bucket=self.bucket_name,
+            key=path,
+            query_auth=True,
+        )
 
     def reindex(self):
         packages = {}
