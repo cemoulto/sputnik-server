@@ -3,6 +3,8 @@ import re
 
 from boto.s3.connection import S3Connection
 
+from . import util
+
 
 class PackageIndex():
     def __init__(self, *args, **kwargs):
@@ -31,16 +33,17 @@ class PackageIndex():
 
     def list(self):
         for item in self.bucket.list():
+            etag = util.unquote(item.etag)
             if item.name.endswith('/meta.json'):
-
                 dirname = os.path.basename(os.path.dirname(item.name))
                 if self.__class__.parse_package_name(dirname):
-                    yield (dirname, '/index/%s' % item.name)
+                    yield (dirname, '/index/%s' % item.name, etag)
 
     def reindex(self):
         packages = {}
-        for name, uri in self.list():
-            packages[name] = uri
+
+        for name, uri, etag in self.list():
+            packages[name] = (uri, etag)
 
         # atomic update
         self.packages = packages

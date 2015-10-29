@@ -28,3 +28,9 @@ def set_config(app, key, value=None, cast=str):
         out_value = env_value
 
     print('%s: %s (%s)' % (key, out_value, env_value.__class__.__name__))
+
+
+def unquote(s):
+    if (s[0] == s[-1]) and s.startswith(("'", '"')):
+        return s[1:-1]
+    return s
