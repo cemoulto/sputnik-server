@@ -40,6 +40,7 @@ app = ShuttleServer(__name__)
 def track_user(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        session.permanent = True
         if not 'install_id' in session:
             session['install_id'] = util.random_string(16)
 
