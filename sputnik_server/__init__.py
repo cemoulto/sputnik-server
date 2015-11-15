@@ -2,6 +2,10 @@ import os
 from datetime import timedelta
 from functools import wraps
 
+import newrelic.agent
+newrelic.agent.initialize('newrelic.ini',
+    os.environ.get('ENVIRONMENT', 'development'))
+
 from flask import (Flask, session, jsonify, abort, redirect, current_app,
                    request)
 
@@ -16,13 +20,21 @@ class SputnikServer(Flask):
 
         self.permanent_session_lifetime = timedelta(days=365)
 
-        util.set_config(self, 'DEBUG', False)
+        util.set_config(self, 'ENVIRONMENT', 'development')
         util.set_config(self, 'SECRET_KEY')
+        util.set_config(self, 'DEBUG', True)
+
         util.set_config(self, 'AWS_ACCESS_KEY_ID')
         util.set_config(self, 'AWS_SECRET_ACCESS_KEY')
-        util.set_config(self, 'S3_BUCKET', 'spacy-index-dev')
         util.set_config(self, 'AWS_REGION', 'eu-central-1')
-        util.set_config(self, 'ACTION_TABLE', 'index-action-dev')
+
+        if self.config['ENVIRONMENT'] in ['development', 'staging']:
+            util.set_config(self, 'S3_BUCKET', 'spacy-index-dev')
+            util.set_config(self, 'ACTION_TABLE', 'index-action-dev')
+
+        elif self.config['ENVIRONMENT'] in ['production']:
+            util.set_config(self, 'S3_BUCKET', 'spacy-index')
+            util.set_config(self, 'ACTION_TABLE', 'index-action')
 
         self.index = PackageIndex(
             access_key_id=self.config['AWS_ACCESS_KEY_ID'],
@@ -37,7 +49,7 @@ class SputnikServer(Flask):
             table=self.config['ACTION_TABLE'])
 
 
-app = SputnikServer(__name__)
+app = newrelic.agent.WSGIApplicationWrapper(SputnikServer(__name__))
 
 
 def track_user(f):
