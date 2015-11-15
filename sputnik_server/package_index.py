@@ -16,11 +16,14 @@ class PackageIndex():
         self.packages = {}
 
         os.environ['S3_USE_SIGV4'] = 'True'
-        self.conn = S3Connection(self.access_key_id,
-                            self.secret_access_key,
-                            host=self.host)
+        self.conn = self.s3_connect()
         self.bucket = self.conn.get_bucket(self.bucket_name, validate=False)
         self.reindex()
+
+    def s3_connect(self):
+        return S3Connection(self.access_key_id,
+            self.secret_access_key,
+            host=self.host)
 
     @classmethod
     def parse_package_name(cls, value):
@@ -58,7 +61,7 @@ class PackageIndex():
 
     def status(self):
         try:
-            self.reindex()
+            self.conn = self.s3_connect()
             return True
         except Exception:
             return False
