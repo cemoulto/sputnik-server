@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from functools import wraps
 
 from flask import (Flask, session, jsonify, abort, redirect, current_app,
@@ -9,17 +10,19 @@ from .index_action import IndexAction
 from . import util
 
 
-class ShuttleServer(Flask):
+class SputnikServer(Flask):
     def __init__(self, *args, **kwargs):
-        super(ShuttleServer, self).__init__(*args, **kwargs)
+        super(SputnikServer, self).__init__(*args, **kwargs)
+
+        self.permanent_session_lifetime = timedelta(days=365)
 
         util.set_config(self, 'DEBUG', False)
         util.set_config(self, 'SECRET_KEY')
         util.set_config(self, 'AWS_ACCESS_KEY_ID')
         util.set_config(self, 'AWS_SECRET_ACCESS_KEY')
-        util.set_config(self, 'S3_BUCKET', 'spacy-index')
+        util.set_config(self, 'S3_BUCKET', 'spacy-index-dev')
         util.set_config(self, 'AWS_REGION', 'eu-central-1')
-        util.set_config(self, 'ACTION_TABLE', 'index-action')
+        util.set_config(self, 'ACTION_TABLE', 'index-action-dev')
 
         self.index = PackageIndex(
             access_key_id=self.config['AWS_ACCESS_KEY_ID'],
@@ -34,7 +37,7 @@ class ShuttleServer(Flask):
             table=self.config['ACTION_TABLE'])
 
 
-app = ShuttleServer(__name__)
+app = SputnikServer(__name__)
 
 
 def track_user(f):
@@ -52,6 +55,11 @@ def track_user(f):
             'range': str(request.range),
             'remote_addr': request.access_route[0],  # support x-forwarded-for header
         })
+
+        # print(session['install_id'])
+        # print(request.headers.get('X-Sputnik-Name'))
+        # print(request.headers.get('X-Sputnik-Version'))
+        # print(request.headers.get('User-Agent'))
 
         return f(*args, **kwargs)
     return decorated_function

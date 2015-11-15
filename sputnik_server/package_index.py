@@ -12,7 +12,6 @@ class PackageIndex():
         self.secret_access_key = kwargs.pop('secret_access_key')
         self.host = kwargs.pop('host')
         self.bucket_name = kwargs.pop('bucket')
-        self.interval = kwargs.pop('interval', 600)  # 600sec = 10min
 
         self.packages = {}
 
@@ -41,7 +40,7 @@ class PackageIndex():
 
     def get_url(self, path):
         return self.conn.generate_url(
-            expires_in=600,
+            expires_in=60,
             method='GET',
             bucket=self.bucket_name,
             key=path,

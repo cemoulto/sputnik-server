@@ -1,6 +1,6 @@
 import os
 
-from shuttle_server import app as application
+from sputnik_server import app as application
 
 
 if __name__ == '__main__':
