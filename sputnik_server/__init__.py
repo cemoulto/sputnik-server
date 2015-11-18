@@ -96,6 +96,14 @@ def reindex():
     })
 
 
+@app.route('/upload', methods=['GET'])
+def upload():
+    return jsonify({
+        'bucket': current_app.config['S3_BUCKET'],
+        'region': current_app.config['AWS_REGION']
+    })
+
+
 @app.route('/index', methods=['GET'])
 @track_user
 def index():
