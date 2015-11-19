@@ -104,15 +104,15 @@ def upload():
     })
 
 
-@app.route('/index', methods=['GET'])
+@app.route('/models', methods=['GET'])
 @track_user
-def index():
+def models():
     return jsonify(current_app.index.packages)
 
 
-@app.route('/index/<package>/<filename>', methods=['HEAD', 'GET'])
+@app.route('/models/<package>/<filename>', methods=['HEAD', 'GET'])
 @track_user
-def index_package(package, filename):
+def models_package(package, filename):
     if filename not in ['meta.json', 'package.json', 'archive.gz']:
         abort(404)
 
