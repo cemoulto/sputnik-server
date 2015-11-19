@@ -39,7 +39,7 @@ class PackageIndex():
             if item.name.endswith('/meta.json'):
                 dirname = os.path.basename(os.path.dirname(item.name))
                 if self.__class__.parse_package_name(dirname):
-                    yield (dirname, '/index/%s' % item.name, etag)
+                    yield (dirname, '/models/%s' % item.name, etag)
 
     def get_url(self, path):
         return self.conn.generate_url(
