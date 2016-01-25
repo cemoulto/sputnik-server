@@ -2,15 +2,16 @@ import json
 from urllib.parse import urlencode
 import http.client
 
+import requests
 
-def print_json(bytes):
+
+def print_json(string):
     defaults = dict(indent=4, separators=(',', ': '))
-    print(json.dumps(json.loads(bytes.decode('utf8')), **defaults))
+    print(json.dumps(json.loads(string), **defaults))
 
 
 class Analytics(object):
     def __init__(self, tracking_id, debug=False):
-        self.conn = http.client.HTTPSConnection('www.google-analytics.com')
         self.tracking_id = tracking_id
         self.debug = debug
 
@@ -18,30 +19,20 @@ class Analytics(object):
         if not self.tracking_id:
             return
 
-        data = urlencode({'v': 1,
-                          't': 'pageview',
-                          'tid': self.tracking_id,
-                          'cid': client_id,
-                          'dh': host,
-                          'dp': path,
-                          'uip': remote_addr,
-                          'ua': user_agent}).encode('ascii')
+        data = {'v': 1,
+                't': 'pageview',
+                'tid': self.tracking_id,
+                'cid': client_id,
+                'dh': host,
+                'dp': path,
+                'uip': remote_addr,
+                'ua': user_agent}
 
-        url = '/collect'
         if self.debug:
-            url = '/debug' + url
+            url = 'https://www.google-analytics.com/debug/collect'
+        else:
+            url = 'https://www.google-analytics.com/collect'
 
-        retries = 3
-        response = None
-        while retries > 0:
-            try:
-                self.conn.request('POST', url, data)
-                response = self.conn.getresponse().read()
-                break
-            except http.client.HTTPException as e:
-                self.conn.connect()
-                retries -= 1
-                continue
-
-        if response and self.debug:
-            print_json(response)
+        r = requests.post(url, data=data)
+        if self.debug:
+            print_json(r.text)
