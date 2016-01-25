@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import timedelta
 from functools import wraps
 
@@ -73,17 +74,18 @@ def track_user(f):
             'remote_addr': request.access_route[0],  # support x-forwarded-for header
         })
 
+        system_string = request.headers.get('X-Sputnik-System')
+        system = {}
+        if system_string:
+            system = json.loads(system_string)
+
         current_app.analytics.pageview(
             client_id=session['install_id'],
             host=request.host.split(':')[0],
             path=request.path,
             remote_addr=request.access_route[0],
-            user_agent=request.user_agent.string)
-
-        # print(session['install_id'])
-        # print(request.headers.get('X-Sputnik-Name'))
-        # print(request.headers.get('X-Sputnik-Version'))
-        # print(request.headers.get('User-Agent'))
+            user_agent=request.user_agent.string,
+            **system)
 
         return f(*args, **kwargs)
     return decorated_function

@@ -11,11 +11,23 @@ def print_json(string):
 
 
 class Analytics(object):
+
+    dimensions = {
+        'cd1': 'app_name',
+        'cd2': 'app_version',
+        'cd3': 'sputnik_version',
+        'cd4': 'py',
+        'cd5': 'py_version',
+        'cd6': 'os',
+        'cd7': 'os_version',
+        'cd8': 'bits'
+    }
+
     def __init__(self, tracking_id, debug=False):
         self.tracking_id = tracking_id
         self.debug = debug
 
-    def pageview(self, client_id, host, path, remote_addr, user_agent):
+    def pageview(self, client_id, host, path, remote_addr, user_agent, **kwargs):
         if not self.tracking_id:
             return
 
@@ -27,6 +39,11 @@ class Analytics(object):
                 'dp': path,
                 'uip': remote_addr,
                 'ua': user_agent}
+
+        for k, v in self.dimensions.items():
+            param = kwargs.get(v)
+            if param:
+                data[k] = param
 
         if self.debug:
             url = 'https://www.google-analytics.com/debug/collect'
