@@ -75,6 +75,7 @@ def track_user(f):
 
         current_app.analytics.pageview(
             client_id=session['install_id'],
+            host=request.host.split(':')[0],
             path=request.path,
             remote_addr=request.access_route[0],
             user_agent=request.user_agent.string)

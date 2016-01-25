@@ -14,7 +14,7 @@ class Analytics(object):
         self.tracking_id = tracking_id
         self.debug = debug
 
-    def pageview(self, client_id, path, remote_addr, user_agent):
+    def pageview(self, client_id, host, path, remote_addr, user_agent):
         if not self.tracking_id:
             return
 
@@ -22,25 +22,26 @@ class Analytics(object):
                           't': 'pageview',
                           'tid': self.tracking_id,
                           'cid': client_id,
+                          'dh': host,
                           'dp': path,
                           'uip': remote_addr,
                           'ua': user_agent}).encode('ascii')
-        
+
         url = '/collect'
         if self.debug:
             url = '/debug' + url
 
         retries = 3
+        response = None
         while retries > 0:
             try:
                 self.conn.request('POST', url, data)
-                response = self.conn.getresponse()
+                response = self.conn.getresponse().read()
                 break
             except http.client.HTTPException as e:
                 self.conn.connect()
                 retries -= 1
                 continue
 
-        body = response.read()
-        if self.debug:
-            print_json(body)
+        if response and self.debug:
+            print_json(response)
