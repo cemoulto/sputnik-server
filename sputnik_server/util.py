@@ -17,7 +17,7 @@ def set_config(app, key, value=None, cast=str):
         raise Exception('environment variable missing: %s' % key)
 
     if isinstance(value, bool) or cast == bool:
-        cast = lambda x: x == 'True'
+        cast = lambda x: x == True or x.lower() == 'true'
 
     env_value = cast(env_value)
     app.config[key] = env_value

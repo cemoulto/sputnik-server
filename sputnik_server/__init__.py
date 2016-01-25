@@ -51,7 +51,8 @@ class SputnikServer(Flask):
             region=self.config['AWS_REGION'],
             table=self.config['ACTION_TABLE'])
 
-        self.analytics = Analytics(self.config['GOOGLE_TRACKING_ID'])
+        self.analytics = Analytics(tracking_id=self.config['GOOGLE_TRACKING_ID'],
+                                   debug=self.config['DEBUG'])
 
 
 app = newrelic.agent.WSGIApplicationWrapper(SputnikServer(__name__))
