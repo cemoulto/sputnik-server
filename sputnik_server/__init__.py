@@ -11,6 +11,7 @@ from flask import (Flask, session, jsonify, abort, redirect, current_app,
 
 from .package_index import PackageIndex
 from .index_action import IndexAction
+from .analytics import Analytics
 from . import util
 
 
@@ -23,6 +24,8 @@ class SputnikServer(Flask):
         util.set_config(self, 'ENVIRONMENT', 'development')
         util.set_config(self, 'SECRET_KEY')
         util.set_config(self, 'DEBUG', True)
+
+        util.set_config(self, 'GOOGLE_TRACKING_ID')
 
         util.set_config(self, 'AWS_ACCESS_KEY_ID')
         util.set_config(self, 'AWS_SECRET_ACCESS_KEY')
@@ -48,6 +51,8 @@ class SputnikServer(Flask):
             region=self.config['AWS_REGION'],
             table=self.config['ACTION_TABLE'])
 
+        self.analytics = Analytics(self.config['GOOGLE_TRACKING_ID'])
+
 
 app = newrelic.agent.WSGIApplicationWrapper(SputnikServer(__name__))
 
@@ -67,6 +72,12 @@ def track_user(f):
             'range': str(request.range),
             'remote_addr': request.access_route[0],  # support x-forwarded-for header
         })
+
+        current_app.analytics.pageview(
+            client_id=session['install_id'],
+            path=request.path,
+            remote_addr=request.access_route[0],
+            user_agent=request.user_agent.string)
 
         # print(session['install_id'])
         # print(request.headers.get('X-Sputnik-Name'))
