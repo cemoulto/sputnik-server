@@ -29,9 +29,18 @@ class Analytics(object):
         url = '/collect'
         if self.debug:
             url = '/debug' + url
-    
-        self.conn.request('POST', url, data)
-        response = self.conn.getresponse().read()
-    
+
+        retries = 3
+        while retries > 0:
+            try:
+                self.conn.request('POST', url, data)
+                response = self.conn.getresponse()
+                break
+            except http.client.HTTPException as e:
+                self.conn.connect()
+                retries -= 1
+                continue
+
+        body = response.read()
         if self.debug:
-            print_json(response)
+            print_json(body)
