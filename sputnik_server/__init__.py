@@ -75,9 +75,10 @@ def track_user(f):
         })
 
         system_string = request.headers.get('X-Sputnik-System')
-        system = {}
         if system_string:
             system = json.loads(system_string)
+        else:
+            system = util.parse_user_agent(request.user_agent.string)
 
         current_app.analytics.pageview(
             client_id=session['install_id'],
