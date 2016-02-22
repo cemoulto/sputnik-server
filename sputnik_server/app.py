@@ -23,10 +23,10 @@ class SputnikServer(Flask):
         self.permanent_session_lifetime = timedelta(days=365)
 
         util.set_config(self, 'ENVIRONMENT', 'development')
-        util.set_config(self, 'SECRET_KEY')
+        util.set_config(self, 'SECRET_KEY', False)
         util.set_config(self, 'DEBUG', True)
 
-        util.set_config(self, 'GOOGLE_TRACKING_ID')
+        util.set_config(self, 'GOOGLE_TRACKING_ID', False)
 
         util.set_config(self, 'AWS_ACCESS_KEY_ID')
         util.set_config(self, 'AWS_SECRET_ACCESS_KEY')
@@ -61,6 +61,9 @@ app = newrelic.agent.WSGIApplicationWrapper(SputnikServer(__name__))
 def track_user(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        if not current_app.config['SECRET_KEY']:
+            return f(*args, **kwargs)
+
         session.permanent = True
         if not 'install_id' in session:
             session['install_id'] = util.random_string(16)
