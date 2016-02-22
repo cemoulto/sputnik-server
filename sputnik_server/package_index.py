@@ -1,5 +1,7 @@
 import os
 import re
+import json
+from collections import defaultdict
 
 from boto.s3.connection import S3Connection
 
@@ -38,8 +40,9 @@ class PackageIndex():
             etag = util.unquote(item.etag)
             if item.name.endswith('/meta.json'):
                 dirname = os.path.basename(os.path.dirname(item.name))
-                if self.__class__.parse_package_name(dirname):
-                    yield (dirname, '/models/%s' % item.name, etag)
+                package = json.loads(item.get_contents_as_string().decode('utf8'))['package']
+                if package:
+                    yield (dirname, '/models/%s' % item.name, etag, package['compatibility'].keys())
 
     def get_url(self, path):
         return self.conn.generate_url(
@@ -51,10 +54,11 @@ class PackageIndex():
         )
 
     def reindex(self):
-        packages = {}
+        packages = defaultdict(dict)
 
-        for name, uri, etag in self.list():
-            packages[name] = (uri, etag)
+        for name, uri, etag, app_names in self.list():
+            for app_name in app_names:
+                packages[app_name][name] = (uri, etag)
 
         # atomic update
         self.packages = packages

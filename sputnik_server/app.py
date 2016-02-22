@@ -125,6 +125,13 @@ def upload():
 @app.route('/models', methods=['GET'])
 @track_user
 def models():
+    app_name = util.get_system(request).get('app_name')
+    return jsonify(current_app.index.packages.get(app_name, {}))
+
+
+@app.route('/all_models', methods=['GET'])
+@track_user
+def all_models():
     return jsonify(current_app.index.packages)
 
 
@@ -134,7 +141,8 @@ def models_package(package, filename):
     if filename not in ['meta.json', 'package.json', 'archive.gz']:
         abort(404)
 
-    if not package in current_app.index.packages:
+    app_name = util.get_system(request).get('app_name')
+    if not package in current_app.index.packages.get(app_name, []):
         abort(404)
 
     return redirect(current_app.index.get_url(os.path.join(package, filename)))

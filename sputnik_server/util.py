@@ -1,6 +1,7 @@
 import os
 import string
 import random
+import json
 
 
 def random_string(size, chars=string.ascii_letters + string.digits):
@@ -86,3 +87,8 @@ def parse_user_agent(ua):
         'os_version': os_version,
         'bits': bits
     }
+
+
+def get_system(request):
+    system_string = request.headers.get('X-Sputnik-System')
+    return system_string and json.loads(system_string) or {}
