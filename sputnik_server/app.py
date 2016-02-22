@@ -16,9 +16,9 @@ from .analytics import Analytics
 from . import util
 
 
-class SputnikServer(Flask):
+class App(Flask):
     def __init__(self, *args, **kwargs):
-        super(SputnikServer, self).__init__(*args, **kwargs)
+        super(App, self).__init__(*args, **kwargs)
 
         self.permanent_session_lifetime = timedelta(days=365)
 
@@ -55,7 +55,7 @@ class SputnikServer(Flask):
         self.analytics = Analytics(tracking_id=self.config['GOOGLE_TRACKING_ID'])
 
 
-app = newrelic.agent.WSGIApplicationWrapper(SputnikServer(__name__))
+app = newrelic.agent.WSGIApplicationWrapper(App(__name__))
 
 
 def track_user(f):
