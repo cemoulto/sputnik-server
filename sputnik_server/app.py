@@ -125,12 +125,8 @@ def upload():
 @app.route('/models', methods=['GET'])
 @track_user
 def models():
-    system_app_name = util.get_system(request).get('app_name')
-    res = {}
-    for app_name, packages in current_app.index.packages.items():
-        if system_app_name is None or system_app_name == app_name:
-            res.update(packages)
-    return jsonify(res)
+    app_name = util.get_system(request).get('app_name')
+    return jsonify(current_app.index.packages(app_name))
 
 
 @app.route('/models/<package>/<filename>', methods=['HEAD', 'GET'])
@@ -140,7 +136,7 @@ def models_package(package, filename):
         abort(404)
 
     app_name = util.get_system(request).get('app_name')
-    if not package in current_app.index.packages.get(app_name, []):
+    if package not in current_app.index.packages(app_name):
         abort(404)
 
     return redirect(current_app.index.get_url(os.path.join(package, filename)))

@@ -15,7 +15,7 @@ class PackageIndex():
         self.host = kwargs.pop('host')
         self.bucket_name = kwargs.pop('bucket')
 
-        self.packages = {}
+        self._packages = {}
 
         os.environ['S3_USE_SIGV4'] = 'True'
         self.conn = self.s3_connect()
@@ -61,7 +61,14 @@ class PackageIndex():
                 packages[app_name][name] = (uri, etag)
 
         # atomic update
-        self.packages = packages
+        self._packages = packages
+
+    def packages(self, name):
+        res = {}
+        for app_name, pkgs in self._packages.items():
+            if name is None or name == app_name:
+                res.update(pkgs)
+        return res
 
     def status(self):
         try:
