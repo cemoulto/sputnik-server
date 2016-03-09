@@ -9,7 +9,10 @@ def random_string(size, chars=string.ascii_letters + string.digits):
 
 
 def hide(value):
-    return value and '*' * len(value)
+    if isinstance(value, bool):
+        return value
+    else:
+        return '*' * len(value)
 
 
 def set_config(app, key, value=None, cast=str):
